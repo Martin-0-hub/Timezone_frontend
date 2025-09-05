@@ -1,6 +1,7 @@
 // src/pages/RegisterPage.tsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { register } from "../services/auth";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -8,9 +9,21 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Register with:", { name, email, password });
+    // console.log("Register with:", { name, email, password });
+    try {
+      if(password == confirmpassword){
+        const data = await register(name,email,password,confirmpassword);
+        console.log("Registerd:",data);
+        alert('Registration successful')
+      }else {
+        alert('Password is not matched.')
+      }
+    } catch (err:any){
+      console.log(err);
+      alert("Failed to register");
+    }
   };
 
   return (
@@ -49,7 +62,7 @@ export default function RegisterPage() {
           type="password"
           placeholder="confirm Password"
           value={confirmpassword}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           className="w-full px-4 py-2 mb-6 border rounded-lg text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800"
         />
 

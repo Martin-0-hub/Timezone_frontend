@@ -1,15 +1,27 @@
-// App.tsx
+// src/App.tsx
 import React, { useState, useMemo, useEffect } from "react";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
 import { orange, deepOrange } from "@mui/material/colors";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import DashboardPage from "./pages/DashboardPage";
 
+// --------------------
+// Private Route Wrapper
+// --------------------
+const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const token = localStorage.getItem("accessToken");
+  return token ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+// --------------------
+// App Component
+// --------------------
 const App: React.FC = () => {
   // Dark mode state with localStorage persistence
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -45,9 +57,22 @@ const App: React.FC = () => {
       <Router>
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+
+          {/* Private Routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <DashboardPage />
+              </PrivateRoute>
+            }
+          />
+          {/* Fallback: redirect unknown routes to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Footer />
       </Router>

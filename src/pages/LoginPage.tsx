@@ -1,27 +1,47 @@
-// src/pages/LoginPage.tsx
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-export default function LoginPage() {
+const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login with:", { email, password });
+
+    try {
+      const res = await fetch("http://localhost:8000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem("accessToken", data.access);
+        localStorage.setItem("refreshToken", data.refresh);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/dashboard"); // redirect
+      } else {
+        alert(data.detail || "Login failed");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Login error");
+    }
   };
 
- return (
+  return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black px-4">
       <form
         onSubmit={handleLogin}
-        className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-2xl w-full max-w-md flex flex-col" 
+        className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-2xl w-full max-w-md flex flex-col"
       >
         <h2 className="dark:text-white text-3xl font-extrabold mb-6 text-center text-gray-800">
           Welcome Back
         </h2>
 
-        {/* Email */}
         <div className="mb-4 flex flex-col">
           <label className="block text-sm font-medium text-gray-600 mb-1">
             Email
@@ -35,7 +55,6 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Password */}
         <div className="mb-6 flex flex-col">
           <label className="block text-sm font-medium text-gray-600 mb-1">
             Password
@@ -49,7 +68,6 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Button */}
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition duration-300"
@@ -57,7 +75,6 @@ export default function LoginPage() {
           Login
         </button>
 
-        {/* Footer text */}
         <p className="mt-4 text-center text-sm text-gray-600">
           Don’t have an account?{" "}
           <Link
@@ -70,4 +87,6 @@ export default function LoginPage() {
       </form>
     </div>
   );
-}
+};
+
+export default LoginPage;
